@@ -1,0 +1,157 @@
+[gd_scene format=3 uid="uid://dnnbm3s2j6c3i"]
+
+[ext_resource type="Script" uid="uid://n1gtgtbsxwoj" path="res://scripts/screens/pause_screen.gd" id="1_6g2nm"]
+
+[sub_resource type="Animation" id="Animation_6g2nm"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:modulate:a")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [1.0]
+}
+
+[sub_resource type="Animation" id="Animation_me20o"]
+resource_name = "fade_anim"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:modulate:a")
+tracks/0/interp = 2
+tracks/0/loop_wrap = false
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 1.0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_mbtw4"]
+_data = {
+&"RESET": SubResource("Animation_6g2nm"),
+&"fade_anim": SubResource("Animation_me20o")
+}
+
+[node name="PauseScreen" type="Control" unique_id=803890422]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_6g2nm")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1756143621]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.11372549, 0, 0.12941177, 0.23137255)
+
+[node name="ResumeButton" type="Button" parent="." unique_id=586440134]
+layout_mode = 0
+offset_left = 491.0
+offset_top = 155.0
+offset_right = 585.0
+offset_bottom = 174.0
+focus_neighbor_left = NodePath("../ExitDesktopButton")
+focus_neighbor_top = NodePath("../ExitDesktopButton")
+focus_neighbor_right = NodePath("../SaveButton")
+focus_neighbor_bottom = NodePath("../SaveButton")
+focus_next = NodePath("../SaveButton")
+focus_previous = NodePath("../ExitDesktopButton")
+text = "[ RESUME ]"
+
+[node name="SaveButton" type="Button" parent="." unique_id=89710346]
+layout_mode = 0
+offset_left = 566.0
+offset_top = 214.0
+offset_right = 641.0
+offset_bottom = 233.0
+focus_neighbor_left = NodePath("../ResumeButton")
+focus_neighbor_top = NodePath("../ResumeButton")
+focus_neighbor_right = NodePath("../LoadButton")
+focus_neighbor_bottom = NodePath("../LoadButton")
+focus_next = NodePath("../LoadButton")
+focus_previous = NodePath("../ResumeButton")
+text = "[ SAVE ]"
+
+[node name="LoadButton" type="Button" parent="." unique_id=782042777]
+layout_mode = 0
+offset_left = 490.0
+offset_top = 277.0
+offset_right = 565.0
+offset_bottom = 296.0
+focus_neighbor_left = NodePath("../SaveButton")
+focus_neighbor_top = NodePath("../SaveButton")
+focus_neighbor_right = NodePath("../OptionButton")
+focus_neighbor_bottom = NodePath("../OptionButton")
+focus_next = NodePath("../OptionButton")
+focus_previous = NodePath("../SaveButton")
+text = "[ LOAD ]"
+
+[node name="OptionButton" type="Button" parent="." unique_id=2008826497]
+layout_mode = 0
+offset_left = 565.0
+offset_top = 328.0
+offset_right = 659.0
+offset_bottom = 347.0
+focus_neighbor_left = NodePath("../LoadButton")
+focus_neighbor_top = NodePath("../LoadButton")
+focus_neighbor_right = NodePath("../ExitMainButton")
+focus_neighbor_bottom = NodePath("../ExitMainButton")
+focus_next = NodePath("../ExitMainButton")
+focus_previous = NodePath("../LoadButton")
+text = "[ OPTION ]"
+
+[node name="ExitMainButton" type="Button" parent="." unique_id=807405997]
+layout_mode = 0
+offset_left = 451.0
+offset_top = 380.0
+offset_right = 648.0
+offset_bottom = 399.0
+focus_neighbor_left = NodePath("../OptionButton")
+focus_neighbor_top = NodePath("../OptionButton")
+focus_neighbor_right = NodePath("../ExitDesktopButton")
+focus_neighbor_bottom = NodePath("../ExitDesktopButton")
+focus_next = NodePath("../ExitDesktopButton")
+focus_previous = NodePath("../OptionButton")
+text = "[ EXIT TO MAIN MENU ]"
+
+[node name="ExitDesktopButton" type="Button" parent="." unique_id=1192204684]
+layout_mode = 0
+offset_left = 557.0
+offset_top = 440.0
+offset_right = 736.0
+offset_bottom = 459.0
+focus_neighbor_left = NodePath("../ExitMainButton")
+focus_neighbor_top = NodePath("../ExitMainButton")
+focus_neighbor_right = NodePath("../ResumeButton")
+focus_neighbor_bottom = NodePath("../ResumeButton")
+focus_next = NodePath("../ResumeButton")
+focus_previous = NodePath("../ExitMainButton")
+text = "[ EXIT TO DESKTOP ]"
+
+[node name="FadeAnimation" type="AnimationPlayer" parent="." unique_id=159633907]
+libraries/ = SubResource("AnimationLibrary_mbtw4")
+autoplay = &"fade_anim"
+
+[connection signal="focus_entered" from="ResumeButton" to="." method="_on_resume_button_focus_entered"]
+[connection signal="pressed" from="ResumeButton" to="." method="_on_resume_button_pressed"]
+[connection signal="focus_entered" from="SaveButton" to="." method="_on_save_button_focus_entered"]
+[connection signal="focus_entered" from="LoadButton" to="." method="_on_load_button_focus_entered"]
+[connection signal="focus_entered" from="OptionButton" to="." method="_on_option_button_focus_entered"]
+[connection signal="focus_entered" from="ExitMainButton" to="." method="_on_exit_main_button_focus_entered"]
+[connection signal="button_down" from="ExitDesktopButton" to="." method="_on_exit_desktop_button_button_down"]
+[connection signal="focus_entered" from="ExitDesktopButton" to="." method="_on_exit_desktop_button_focus_entered"]
+[connection signal="animation_finished" from="FadeAnimation" to="." method="_on_fade_animation_animation_finished"]

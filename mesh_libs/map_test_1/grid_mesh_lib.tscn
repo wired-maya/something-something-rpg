@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://ihdg1fk2ajqa"]
+
+[ext_resource type="Texture2D" uid="uid://clbfcbd6qkr5m" path="res://textures/map_test_1/most_normal_maya_texture.png" id="1_t8sun"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jpm4u"]
+albedo_texture = ExtResource("1_t8sun")
+uv1_scale = Vector3(3, 2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_y14r7"]
+material = SubResource("StandardMaterial3D_jpm4u")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_y14r7"]
+
+[node name="Node3D" type="Node3D" unique_id=101729125 groups=["World"]]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1285924342]
+mesh = SubResource("BoxMesh_y14r7")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D" unique_id=1566777723]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D/StaticBody3D" unique_id=496273267]
+shape = SubResource("BoxShape3D_y14r7")

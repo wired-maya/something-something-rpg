@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://b4mkckfnqnblp"]
+
+[ext_resource type="Script" uid="uid://ddwyrykiyqwj1" path="res://scripts/entities/player/player.gd" id="1_4flbx"]
+[ext_resource type="PackedScene" uid="uid://coqmw74woy6wj" path="res://scenes/ui/hud/gameplay_hud.tscn" id="2_onrkg"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_4flbx"]
+size = Vector3(0.5, 0.5, 0.5)
+
+[node name="Player" type="Area3D" unique_id=864662381]
+collision_layer = 2
+script = ExtResource("1_4flbx")
+metadata/_edit_group_ = true
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1338410548]
+current = true
+
+[node name="GameplayHUD" parent="Camera3D" unique_id=988021718 instance=ExtResource("2_onrkg")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1719573442]
+shape = SubResource("BoxShape3D_4flbx")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

@@ -1,0 +1,51 @@
+[gd_scene format=3 uid="uid://coqmw74woy6wj"]
+
+[ext_resource type="PackedScene" uid="uid://csmrc5ffu0m3o" path="res://scenes/ui/controls/uilabel.tscn" id="1_jscc3"]
+[ext_resource type="Script" uid="uid://dkik2icq8b3ev" path="res://scenes/ui/hud/gameplay_hud.gd" id="1_l16xx"]
+[ext_resource type="PackedScene" uid="uid://dnnbm3s2j6c3i" path="res://scenes/ui/screens/pause_screen.tscn" id="3_qlhr3"]
+
+[node name="GameplayHUD" type="Control" unique_id=988021718]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_l16xx")
+
+[node name="StatInfoContainer" type="VBoxContainer" parent="." unique_id=161017255]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_top = 0.35
+anchor_right = 1.0
+anchor_bottom = 0.35
+offset_right = -5.0
+grow_horizontal = 0
+
+[node name="RightAlign" type="HBoxContainer" parent="StatInfoContainer" unique_id=1785454742]
+layout_mode = 2
+alignment = 2
+
+[node name="HealthLabel" parent="StatInfoContainer/RightAlign" unique_id=1843900635 instance=ExtResource("1_jscc3")]
+layout_mode = 2
+
+[node name="Label" parent="StatInfoContainer/RightAlign/HealthLabel/TopRect/TextMargin" parent_id_path=PackedInt32Array(1843900635, 813780677) index="0" unique_id=1218797428]
+text = "100//Higgldy Piggldy"
+
+[node name="RightAlign2" type="HBoxContainer" parent="StatInfoContainer" unique_id=770054093]
+layout_mode = 2
+alignment = 2
+
+[node name="UILabel" parent="StatInfoContainer/RightAlign2" unique_id=90720336 instance=ExtResource("1_jscc3")]
+layout_mode = 2
+
+[node name="Label" parent="StatInfoContainer/RightAlign2/UILabel/TopRect/TextMargin" parent_id_path=PackedInt32Array(90720336, 813780677) index="0" unique_id=1218797428]
+text = "50//Mumbly Piggldy"
+
+[node name="PauseScreen" parent="." unique_id=803890422 instance=ExtResource("3_qlhr3")]
+visible = false
+layout_mode = 1
+
+[editable path="StatInfoContainer/RightAlign/HealthLabel"]
+[editable path="StatInfoContainer/RightAlign2/UILabel"]

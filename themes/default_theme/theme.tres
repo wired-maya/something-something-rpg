@@ -1,0 +1,14 @@
+[gd_resource type="Theme" format=3 uid="uid://r4ivupymj3r6"]
+
+[ext_resource type="StyleBox" uid="uid://b3cpa3d3dqssx" path="res://themes/default_theme/styleboxes/buttonstylebox.tres" id="1_110ce"]
+[ext_resource type="StyleBox" uid="uid://bp0wfn014hw7h" path="res://themes/default_theme/styleboxes/buttonfocusedstylebox.tres" id="2_05tig"]
+[ext_resource type="StyleBox" uid="uid://bk5vxec2lljs6" path="res://themes/default_theme/styleboxes/buttonpressedstylebox.tres" id="3_1rmny"]
+[ext_resource type="FontFile" uid="uid://c5eavjv8djtlp" path="res://fonts/CascadiaCode.ttf" id="4_mihib"]
+
+[resource]
+default_font = ExtResource("4_mihib")
+Button/styles/disabled = ExtResource("1_110ce")
+Button/styles/focus = ExtResource("2_05tig")
+Button/styles/hover = ExtResource("2_05tig")
+Button/styles/normal = ExtResource("1_110ce")
+Button/styles/pressed = ExtResource("3_1rmny")
