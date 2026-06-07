@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://2x4vlknmimm1"]
+
+[ext_resource type="Script" uid="uid://8tnx6lw8s5la" path="res://scripts/ui/film_window_system/film_window/film_window_base.gd" id="1_vr1ve"]
+[ext_resource type="Texture2D" uid="uid://clbfcbd6qkr5m" path="res://textures/map_test_1/most_normal_maya_texture.png" id="2_ltvxq"]
+
+[node name="FilmWindow" type="Panel" unique_id=1371030465]
+theme_type_variation = &"FilmWindow"
+script = ExtResource("1_vr1ve")
+
+[node name="PlaceholderTexture" type="TextureRect" parent="." unique_id=2130182355]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 5.0
+offset_bottom = 5.0
+texture = ExtResource("2_ltvxq")
+expand_mode = 1
+metadata/_edit_lock_ = true
+
+[connection signal="child_order_changed" from="." to="." method="_on_child_order_changed"]
+[connection signal="resized" from="." to="." method="_on_resized"]
+[connection signal="theme_changed" from="." to="." method="_on_theme_changed"]

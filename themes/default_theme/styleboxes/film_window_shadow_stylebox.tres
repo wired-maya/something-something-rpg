@@ -1,0 +1,9 @@
+[gd_resource type="StyleBoxFlat" script_class="FilmWindowBaseStyleBox" format=3 uid="uid://cblw244jxqi0v"]
+
+[ext_resource type="Script" uid="uid://be4dqtdbkc7k8" path="res://scripts/ui/film_window_system/film_window/film_window_base_stylebox.gd" id="1_ur18i"]
+
+[resource]
+bg_color = Color(0.11372549, 0, 0.12941177, 1)
+corner_detail = 1
+script = ExtResource("1_ur18i")
+metadata/_custom_type_script = "uid://be4dqtdbkc7k8"

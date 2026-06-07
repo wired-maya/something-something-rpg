@@ -1,5 +1,6 @@
 class_name Math
 
+# TODO: Change to using Tween with interpolate_value()?
 # Convert a float representing animation progress from linear into cosine for animations
 # Input is range is meant to be [0.0, 1.0], however since the cosine function returns a range
 # in  [0.0, 1.0], clamping is not necessary

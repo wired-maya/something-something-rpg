@@ -1,14 +1,27 @@
 [gd_resource type="Theme" format=3 uid="uid://r4ivupymj3r6"]
 
-[ext_resource type="StyleBox" uid="uid://b3cpa3d3dqssx" path="res://themes/default_theme/styleboxes/buttonstylebox.tres" id="1_110ce"]
-[ext_resource type="StyleBox" uid="uid://bp0wfn014hw7h" path="res://themes/default_theme/styleboxes/buttonfocusedstylebox.tres" id="2_05tig"]
-[ext_resource type="StyleBox" uid="uid://bk5vxec2lljs6" path="res://themes/default_theme/styleboxes/buttonpressedstylebox.tres" id="3_1rmny"]
+[ext_resource type="StyleBox" uid="uid://b3cpa3d3dqssx" path="res://themes/default_theme/styleboxes/button_stylebox.tres" id="1_dlexb"]
+[ext_resource type="StyleBox" uid="uid://bp0wfn014hw7h" path="res://themes/default_theme/styleboxes/button_focused_stylebox.tres" id="2_h40kd"]
+[ext_resource type="StyleBox" uid="uid://bk5vxec2lljs6" path="res://themes/default_theme/styleboxes/button_pressed_stylebox.tres" id="3_quenv"]
+[ext_resource type="StyleBox" uid="uid://oema0f4pghn4" path="res://themes/default_theme/styleboxes/film_window_content_container_stylebox.tres" id="4_h40kd"]
 [ext_resource type="FontFile" uid="uid://c5eavjv8djtlp" path="res://fonts/CascadiaCode.ttf" id="4_mihib"]
+[ext_resource type="StyleBox" uid="uid://cblw244jxqi0v" path="res://themes/default_theme/styleboxes/film_window_shadow_stylebox.tres" id="5_h40kd"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_h40kd"]
 
 [resource]
 default_font = ExtResource("4_mihib")
-Button/styles/disabled = ExtResource("1_110ce")
-Button/styles/focus = ExtResource("2_05tig")
-Button/styles/hover = ExtResource("2_05tig")
-Button/styles/normal = ExtResource("1_110ce")
-Button/styles/pressed = ExtResource("3_1rmny")
+Button/styles/disabled = ExtResource("1_dlexb")
+Button/styles/focus = ExtResource("2_h40kd")
+Button/styles/hover = ExtResource("2_h40kd")
+Button/styles/normal = ExtResource("1_dlexb")
+Button/styles/pressed = ExtResource("3_quenv")
+FilmWindow/base_type = &"Panel"
+FilmWindow/constants/content_container_offset_x = 0
+FilmWindow/constants/content_container_offset_y = 0
+FilmWindow/constants/shadow_offset_x = 20
+FilmWindow/constants/shadow_offset_y = 20
+FilmWindow/styles/content_container = ExtResource("4_h40kd")
+FilmWindow/styles/panel = SubResource("StyleBoxEmpty_h40kd")
+FilmWindow/styles/shadow = ExtResource("5_h40kd")
+PanelContainer/styles/panel = ExtResource("4_h40kd")
