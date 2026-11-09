@@ -1,4 +1,4 @@
-@tool class_name FilmWindow extends Panel
+@tool class_name FilmWindowOld extends Panel
 
 # TODO: MAKE IN RUST!!!!
 # TODO: MAKE AN EDITOR FOR THESE IN RUST!!!!
@@ -7,7 +7,7 @@
 
 #region Data Classes
 
-class RectState:
+class RectStateOld:
 	var current: Rect2
 	var final: Rect2
 
@@ -15,7 +15,7 @@ class RectState:
 		current = _rect_cur
 		final = _rect_final
 
-class TweenInfo:
+class TweenInfoOld:
 	var trans_type: Tween.TransitionType
 	var ease_type: Tween.EaseType
 	var delay: float
@@ -64,37 +64,37 @@ enum TweenOffsetMotion {
 #region Signals
 # Signals at every stage of animation for further animations
 # Coordinates are all global
-signal tween_content_container_changed(window: FilmWindow, state: RectState, tween: TweenInfo)
-signal tween_content_container_changed_start(window: FilmWindow, state: RectState, tween: TweenInfo)
-signal tween_content_container_changed_end(window: FilmWindow, state: RectState, tween: TweenInfo)
+signal tween_content_container_changed(window: FilmWindow, state: RectStateOld, tween: TweenInfoOld)
+signal tween_content_container_changed_start(window: FilmWindow, state: RectStateOld, tween: TweenInfoOld)
+signal tween_content_container_changed_end(window: FilmWindow, state: RectStateOld, tween: TweenInfoOld)
 
-signal tween_shadow_changed(window: FilmWindow, state: RectState, tween: TweenInfo)
-signal tween_shadow_changed_start(window: FilmWindow, state: RectState, tween: TweenInfo)
-signal tween_shadow_changed_end(window: FilmWindow, state: RectState, tween: TweenInfo)
+signal tween_shadow_changed(window: FilmWindow, state: RectStateOld, tween: TweenInfoOld)
+signal tween_shadow_changed_start(window: FilmWindow, state: RectStateOld, tween: TweenInfoOld)
+signal tween_shadow_changed_end(window: FilmWindow, state: RectStateOld, tween: TweenInfoOld)
 
-signal tween_window_changed(window: FilmWindow, content_container_state: RectState, shadow_state: RectState, tween: TweenInfo)
-signal tween_window_changed_start(window: FilmWindow, content_container_state: RectState, shadow_state: RectState, tween: TweenInfo)
-signal tween_window_changed_end(window: FilmWindow, content_container_state: RectState, shadow_state: RectState, tween: TweenInfo)
+signal tween_window_changed(window: FilmWindow, content_container_state: RectStateOld, shadow_state: RectStateOld, tween: TweenInfoOld)
+signal tween_window_changed_start(window: FilmWindow, content_container_state: RectStateOld, shadow_state: RectStateOld, tween: TweenInfoOld)
+signal tween_window_changed_end(window: FilmWindow, content_container_state: RectStateOld, shadow_state: RectStateOld, tween: TweenInfoOld)
 
-signal tween_offset_changed(window: FilmWindow, content_container_state: RectState, shadow_state: RectState, tween: TweenInfo)
-signal tween_offset_changed_start(window: FilmWindow, content_container_state: RectState, shadow_state: RectState, tween: TweenInfo)
-signal tween_offset_changed_end(window: FilmWindow, content_container_state: RectState, shadow_state: RectState, tween: TweenInfo)
+signal tween_offset_changed(window: FilmWindow, content_container_state: RectStateOld, shadow_state: RectStateOld, tween: TweenInfoOld)
+signal tween_offset_changed_start(window: FilmWindow, content_container_state: RectStateOld, shadow_state: RectStateOld, tween: TweenInfoOld)
+signal tween_offset_changed_end(window: FilmWindow, content_container_state: RectStateOld, shadow_state: RectStateOld, tween: TweenInfoOld)
 
 # Delay is the smallest between the window size and shadow offset delays, which is to say it's the delay to any animations starting
 # Similarly, duration is the total duration for all actions to finish
-signal tween_entered(window: FilmWindow, window_content_container_state: RectState, window_shadow_state: RectState, window_tween: TweenInfo, offset_content_container_state: RectState, offset_shadow_state: RectState, offset_tween: TweenInfo, delay: float, duration: float)
-signal tween_changed(window: FilmWindow, window_content_container_state: RectState, window_shadow_state: RectState, window_tween: TweenInfo, offset_content_container_state: RectState, offset_shadow_state: RectState, offset_tween: TweenInfo, delay: float, duration: float)
-signal tween_exited(window: FilmWindow, window_content_container_state: RectState, window_shadow_state: RectState, window_tween: TweenInfo, offset_content_container_state: RectState, offset_shadow_state: RectState, offset_tween: TweenInfo, delay: float, duration: float)
+signal tween_entered(window: FilmWindow, window_content_container_state: RectStateOld, window_shadow_state: RectStateOld, window_tween: TweenInfoOld, offset_content_container_state: RectStateOld, offset_shadow_state: RectStateOld, offset_tween: TweenInfoOld, delay: float, duration: float)
+signal tween_changed(window: FilmWindow, window_content_container_state: RectStateOld, window_shadow_state: RectStateOld, window_tween: TweenInfoOld, offset_content_container_state: RectStateOld, offset_shadow_state: RectStateOld, offset_tween: TweenInfoOld, delay: float, duration: float)
+signal tween_exited(window: FilmWindow, window_content_container_state: RectStateOld, window_shadow_state: RectStateOld, window_tween: TweenInfoOld, offset_content_container_state: RectStateOld, offset_shadow_state: RectStateOld, offset_tween: TweenInfoOld, delay: float, duration: float)
 
 # Signals for tweening clipping control
-signal tween_clipping_control_changed(control: Control, state: RectState, tween: TweenInfo)
-signal tween_clipping_control_changed_start(control: Control, state: RectState, tween: TweenInfo)
-signal tween_clipping_control_changed_end(control: Control, state: RectState, tween: TweenInfo)
+signal tween_clipping_control_changed(control: Control, state: RectStateOld, tween: TweenInfoOld)
+signal tween_clipping_control_changed_start(control: Control, state: RectStateOld, tween: TweenInfoOld)
+signal tween_clipping_control_changed_end(control: Control, state: RectStateOld, tween: TweenInfoOld)
 
 # Signals for tweening the child controls
-signal tween_content_control_changed(control: Control, state: RectState, tween: TweenInfo)
-signal tween_content_control_changed_start(control: Control, state: RectState, tween: TweenInfo)
-signal tween_content_control_changed_end(control: Control, state: RectState, tween: TweenInfo)
+signal tween_content_control_changed(control: Control, state: RectStateOld, tween: TweenInfoOld)
+signal tween_content_control_changed_start(control: Control, state: RectStateOld, tween: TweenInfoOld)
+signal tween_content_control_changed_end(control: Control, state: RectStateOld, tween: TweenInfoOld)
 
 #endregion
 
@@ -175,37 +175,37 @@ var _shadow_offset: Vector2
 var _tween: Tween
 
 # TODO: Recalculate with setters
-var _tween_window_enter_info: TweenInfo = TweenInfo.new(
+var _tween_window_enter_info: TweenInfoOld = TweenInfoOld.new(
 	tween_window_enter_transition,
 	tween_window_enter_easing,
 	tween_window_enter_delay,
 	tween_window_enter_duration
 )
-var _tween_offset_enter_info: TweenInfo = TweenInfo.new(
+var _tween_offset_enter_info: TweenInfoOld = TweenInfoOld.new(
 	tween_offset_enter_transition,
 	tween_offset_enter_easing,
 	tween_offset_enter_delay,
 	tween_offset_enter_duration
 )
-var _tween_window_change_info: TweenInfo = TweenInfo.new(
+var _tween_window_change_info: TweenInfoOld = TweenInfoOld.new(
 	tween_window_change_transition,
 	tween_window_change_easing,
 	tween_window_change_delay,
 	tween_window_change_duration
 )
-var _tween_offset_change_info: TweenInfo = TweenInfo.new(
+var _tween_offset_change_info: TweenInfoOld = TweenInfoOld.new(
 	tween_offset_change_transition,
 	tween_offset_change_easing,
 	tween_offset_change_delay,
 	tween_offset_change_duration
 )
-var _tween_window_exit_info: TweenInfo = TweenInfo.new(
+var _tween_window_exit_info: TweenInfoOld = TweenInfoOld.new(
 	tween_window_exit_transition,
 	tween_window_exit_easing,
 	tween_window_exit_delay,
 	tween_window_exit_duration
 )
-var _tween_offset_exit_info: TweenInfo = TweenInfo.new(
+var _tween_offset_exit_info: TweenInfoOld = TweenInfoOld.new(
 	tween_offset_exit_transition,
 	tween_offset_exit_easing,
 	tween_offset_exit_delay,
@@ -366,8 +366,8 @@ func _tween_method_control(
 #	Signal is emitted when the tween ends
 func _do_tween_rect(
 	method_func: Callable,
-	rect_state: RectState,
-	tween_info: TweenInfo,
+	rect_state: RectStateOld,
+	tween_info: TweenInfoOld,
 	signal_changed: Signal,
 	signal_start: Signal,
 	signal_end: Signal
@@ -391,8 +391,8 @@ func _do_tween_control(
 	control: Control,
 	pos_offset: Vector2,
 	size_offset: Vector2,
-	rect_state: RectState,
-	tween_info: TweenInfo,
+	rect_state: RectStateOld,
+	tween_info: TweenInfoOld,
 	signal_changed: Signal,
 	signal_start: Signal,
 	signal_end: Signal
@@ -412,7 +412,7 @@ func _do_tween_control(
 	signal_changed.emit(control, rect_state, tween_info)
 
 # Tween the container's location to a given rect with the appropriate offsets
-func _do_tween_content_container(rect_state: RectState, tween_info: TweenInfo) -> void:
+func _do_tween_content_container(rect_state: RectStateOld, tween_info: TweenInfoOld) -> void:
 	_do_tween_rect(
 		_tween_method_content_container,
 		rect_state,
@@ -422,7 +422,7 @@ func _do_tween_content_container(rect_state: RectState, tween_info: TweenInfo) -
 		tween_content_container_changed_end
 	)
 
-func _do_tween_shadow(rect_state: RectState, tween_info: TweenInfo) -> void:
+func _do_tween_shadow(rect_state: RectStateOld, tween_info: TweenInfoOld) -> void:
 	_do_tween_rect(
 		_tween_method_shadow,
 		rect_state,
@@ -434,9 +434,9 @@ func _do_tween_shadow(rect_state: RectState, tween_info: TweenInfo) -> void:
 
 # Generic function for tweening both rects
 func _do_tween_rects(
-	content_container_rect_state: RectState,
-	shadow_rect_state: RectState,
-	tween_info: TweenInfo,
+	content_container_rect_state: RectStateOld,
+	shadow_rect_state: RectStateOld,
+	tween_info: TweenInfoOld,
 	
 	signal_call: Signal, # Emitted when this function is called
 	signal_start: Signal,
@@ -459,13 +459,13 @@ func _do_tween_offsets(
 	tween_offset_motion: TweenOffsetMotion,
 	content_container_from: Rect2,
 	shadow_from: Rect2,
-	tween_info: TweenInfo
+	tween_info: TweenInfoOld
 ) -> void:
-	var offset_content_container_rect_state: RectState = RectState.new(
+	var offset_content_container_rect_state: RectStateOld = RectStateOld.new(
 		content_container_from,
 		content_container_from
 	)
-	var offset_shadow_rect_state: RectState = RectState.new(
+	var offset_shadow_rect_state: RectStateOld = RectStateOld.new(
 		shadow_from,
 		shadow_from
 	)
@@ -489,8 +489,8 @@ func _do_tween_offsets(
 
 # Starts clipping, clipping must be stopped manually afterwards
 func _do_tween_clipping_control(
-	content_container_rect_state: RectState,
-	tween_info: TweenInfo,
+	content_container_rect_state: RectStateOld,
+	tween_info: TweenInfoOld,
 	clip_mode: TweenClipMode
 ) -> void:
 	if not _clipping_control:
@@ -525,7 +525,7 @@ func _do_tween_clipping_control(
 				child,
 				Vector2.ZERO,
 				Vector2.ZERO,
-				RectState.new(
+				RectStateOld.new(
 					Rect2(
 						-content_container_rect_state.current.position, # Keep it relative to FilmWindow
 						child_size
@@ -542,10 +542,10 @@ func _do_tween_clipping_control(
 			)
 
 func _do_tween_window_size(
-	content_container_rect_state: RectState,
-	shadow_rect_state: RectState,
+	content_container_rect_state: RectStateOld,
+	shadow_rect_state: RectStateOld,
 	clip_mode: TweenClipMode,
-	tween_info: TweenInfo
+	tween_info: TweenInfoOld
 ) -> void:
 	_do_tween_rects(
 		content_container_rect_state,
@@ -583,8 +583,8 @@ func _do_tween_window_size(
 # TODO: Move chain commands here instead of other tween funcs
 func _do_tween_change(
 	new_rect: Rect2,
-	tween_window_info: TweenInfo,
-	tween_offset_info: TweenInfo,
+	tween_window_info: TweenInfoOld,
+	tween_offset_info: TweenInfoOld,
 	tween_offset_mode: TweenOffsetMode,
 	callback: Callable,
 	clip_mode: TweenClipMode = TweenClipMode.STRETCH,
@@ -606,11 +606,11 @@ func _do_tween_change(
 	_content_container_rect.position -= window_control_rect_pos_diff
 	_shadow_rect.position -= window_control_rect_pos_diff
 	
-	var window_content_container_rect_state: RectState = RectState.new(
+	var window_content_container_rect_state: RectStateOld = RectStateOld.new(
 		_content_container_rect,
 		Rect2(Vector2.ZERO, new_rect.size)
 	)
-	var window_shadow_rect_state: RectState = RectState.new(
+	var window_shadow_rect_state: RectStateOld = RectStateOld.new(
 		_shadow_rect,
 		Rect2(Vector2.ZERO, new_rect.size)
 	)
@@ -647,11 +647,11 @@ func _do_tween_change(
 	if clip_mode == TweenClipMode.CLIP_CURRENT_SIZE or clip_mode == TweenClipMode.CLIP_FINAL_SIZE:
 		_tween.tween_callback(_stop_clipping)
 	
-	var offset_content_container_rect_state: RectState = RectState.new(
+	var offset_content_container_rect_state: RectStateOld = RectStateOld.new(
 		_content_container_rect,
 		window_content_container_rect_state.final
 	)
-	var offset_shadow_rect_state: RectState = RectState.new(
+	var offset_shadow_rect_state: RectStateOld = RectStateOld.new(
 		_shadow_rect,
 		window_shadow_rect_state.final
 	)
@@ -702,7 +702,7 @@ func _do_tween_change(
 	)
 
 func _do_tween_enter(callback: Callable) -> void:
-	var window_rect_state: RectState = RectState.new(
+	var window_rect_state: RectStateOld = RectStateOld.new(
 		Rect2(position + (tween_enter_anchor * size), Vector2.ZERO),
 		get_rect()
 	)
@@ -735,7 +735,7 @@ func _do_tween_enter(callback: Callable) -> void:
 	)
 
 func _do_tween_exit(callback: Callable) -> void:
-	var window_rect_state: RectState = RectState.new(
+	var window_rect_state: RectStateOld = RectStateOld.new(
 		get_rect(),
 		Rect2(position + (tween_exit_anchor * size), Vector2.ZERO)
 	)

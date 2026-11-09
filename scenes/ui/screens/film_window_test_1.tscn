@@ -1,6 +1,14 @@
 [gd_scene format=3 uid="uid://cd7wi8sysv8d4"]
 
 [ext_resource type="Script" uid="uid://dbvrrvvdy3xdc" path="res://scripts/screens/film_window_test_1.gd" id="1_6qkif"]
+[ext_resource type="Theme" uid="uid://r4ivupymj3r6" path="res://themes/default_theme/theme.tres" id="2_st2bw"]
 
 [node name="FilmWindowTest1" type="Node2D" unique_id=1781832368]
 script = ExtResource("1_6qkif")
+
+[node name="FilmWindow" type="FilmWindow" parent="." unique_id=1908335280]
+offset_left = 158.0
+offset_top = 168.0
+offset_right = 316.0
+offset_bottom = 293.0
+theme = ExtResource("2_st2bw")

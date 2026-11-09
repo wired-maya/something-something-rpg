@@ -11,6 +11,7 @@ func _init() -> void:
 "
 
 [resource]
-Editor/colors/extra_border_color_1 = Color(0.23137255, 0, 0.20392157, 1)
-Editor/colors/extra_border_color_2 = Color(0.23137255, 0, 0.20392157, 1)
+Editor/colors/extra_border_color_1 = Color(0, 0, 0, 1)
+Editor/colors/extra_border_color_2 = Color(0, 0, 0, 1)
+Tree/constants/relationship_line_width = 0
 script = SubResource("GDScript_f4xp1")

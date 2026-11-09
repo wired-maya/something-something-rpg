@@ -1,7 +1,6 @@
 extends Node2D
 
 var window
-var cross
 
 var is_pos_1: bool = true
 var pos_1: Rect2 = Rect2(
@@ -15,10 +14,26 @@ var pos_2: Rect2 = Rect2(
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	pass
+	#pass
 	if not window:
-			window = preload("res://scenes/ui/film_window_system/film_window.tscn") \
-				.instantiate()
+		is_pos_1 = true
+		window = FilmWindow.new()
+		window.set_position(Vector2(30.0, 30.0))
+		window.set_size(Vector2(400.0, 400.0))
+		
+		#cross = TransitionCrosshair.new()
+		#cross.connect_to_window(window)
+		
+		#add_child(cross)
+		add_child(window)
+		move_child(window, 0)
+
+func _unhandled_input(event: InputEvent) -> void:
+	#pass
+	if event.is_action_pressed("ui_accept"):
+		if not window:
+			is_pos_1 = true
+			window = FilmWindow.new()
 			window.set_position(Vector2(30.0, 30.0))
 			window.set_size(Vector2(400.0, 400.0))
 			
@@ -28,30 +43,14 @@ func _ready() -> void:
 			#add_child(cross)
 			add_child(window)
 			move_child(window, 0)
-
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_accept"):
-		#if not window:
-			#window = preload("res://scenes/ui/film_window_system/film_window.tscn") \
-				#.instantiate()
-			##window.set_position(Vector2(30.0, 30.0))
-			##window.set_size(Vector2(400.0, 400.0))
-			#
-			##cross = TransitionCrosshair.new()
-			##cross.connect_to_window(window)
-			#
-			##add_child(cross)
-			#add_child(window)
-			#move_child(window, 0)
-			#
-			#window.enter(pos_1)
-		#else:
-			#window.close()
-		if is_pos_1:
-			window.set_rect(pos_2)
+		elif is_pos_1:
+			window.set_rect(pos_2, func(): pass)
 			
 			is_pos_1 = false
 		else:
-			window.set_rect(pos_1)
+			window.set_rect(pos_1, func(): pass)
 			
 			is_pos_1 = true
+	elif event.is_action_pressed("ui_cancel"):
+		if window:
+			window.close()

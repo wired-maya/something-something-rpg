@@ -1,0 +1,14 @@
+[configuration]
+entry_symbol = "gdext_rust_init"
+compatibility_minimum = 4.1
+reloadable = true
+
+[libraries]
+linux.debug.x86_64 =     "res://film_window_rs/target/debug/libfilm_window_rs.so"
+linux.release.x86_64 =   "res://film_window_rs/target/release/libfilm_window_rs.so"
+windows.debug.x86_64 =   "res://film_window_rs/target/debug/film_window_rs.dll"
+windows.release.x86_64 = "res://film_window_rs/target/release/film_window_rs.dll"
+macos.debug =            "res://film_window_rs/target/debug/libfilm_window_rs.dylib"
+macos.release =          "res://film_window_rs/target/release/libfilm_window_rs.dylib"
+macos.debug.arm64 =      "res://film_window_rs/target/debug/libfilm_window_rs.dylib"
+macos.release.arm64 =    "res://film_window_rs/target/release/libfilm_window_rs.dylib"

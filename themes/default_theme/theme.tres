@@ -16,7 +16,6 @@ Button/styles/focus = ExtResource("2_h40kd")
 Button/styles/hover = ExtResource("2_h40kd")
 Button/styles/normal = ExtResource("1_dlexb")
 Button/styles/pressed = ExtResource("3_quenv")
-FilmWindow/base_type = &"Panel"
 FilmWindow/constants/content_container_offset_x = 0
 FilmWindow/constants/content_container_offset_y = 0
 FilmWindow/constants/shadow_offset_x = 20

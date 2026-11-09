@@ -1,3 +1,7 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# Project ignores
+.vscode/
+film_window_rs/target/
