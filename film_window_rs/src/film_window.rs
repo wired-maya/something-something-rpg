@@ -74,6 +74,9 @@ pub struct FilmWindow {
 
     // region: Private Variables
 
+    // Ref counter stored so passing down the functions or repeated calls to .to_gd() aren't necessary
+    this: OnReady<Gd<FilmWindow>>,
+
     enter_on_ready: bool,
 
     content_container_style_box: Option<Gd<StyleBox>>,
@@ -159,6 +162,8 @@ impl IPanel for FilmWindow {
 
             tween_exit_anchor: Vector2::new(0.0, 0.0),
 
+            this: OnReady::manual(),
+
             enter_on_ready: true,
 
             // TODO: Make here
@@ -189,6 +194,8 @@ impl IPanel for FilmWindow {
     }
 
     fn ready(&mut self) {
+        self.this.init(self.to_gd());
+
         // Make sure there is a theme loaded
         // Theme is loaded from this
         // if let Some(theme) = ThemeDb::singleton().get_project_theme() {
@@ -279,6 +286,84 @@ impl FilmWindow {
     #[signal] pub fn tween_content_control_changed(control: Gd<Control>, state: Gd<RectState>, tween: Gd<TweenInfo>);
     #[signal] pub fn tween_content_control_changed_start(control: Gd<Control>, state: Gd<RectState>, tween: Gd<TweenInfo>);
     #[signal] pub fn tween_content_control_changed_end(control: Gd<Control>, state: Gd<RectState>, tween: Gd<TweenInfo>);
+
+    // Handle different types of signals
+    fn get_signal_emit_callable(signal: Signal, varargs: Vec<Variant>) -> Callable {
+        let name: String = signal.name().to_string();
+        Callable::from_fn(name, move |_| {
+            signal.emit(&varargs);
+        })
+    }
+
+    // TODO: Since these are static, can they be implemented on the type alias?
+    // TODO: Either way, move them out to anim_data_types.rs
+    fn get_signal_emit_callable_anim_component(
+        signal: AnimComponentSignal,
+        rect_state: Gd<RectState>,
+        tween_info: Gd<TweenInfo>
+    ) -> Callable {
+        let signal: Signal = signal.to_untyped();
+        let this: Gd<Object> = signal.object().expect("Signal needs to be connected to an object to be fired");
+        Callable::from_fn("emit_anim_component_signal", move |_| {
+            signal.emit(&[this.to_variant(), rect_state.to_variant(), tween_info.to_variant()]);
+        })
+    }
+
+    fn signal_emit_anim_component(
+        signal: AnimComponentSignal,
+        rect_state: Gd<RectState>,
+        tween_info: Gd<TweenInfo>
+    ) {
+        let signal: Signal = signal.to_untyped();
+        let this: Gd<Object> = signal.object().expect("Signal needs to be connected to an object to be fired");
+        signal.emit(&[this.to_variant(), rect_state.to_variant(), tween_info.to_variant()]);
+    }
+
+    fn get_signal_emit_callable_anim_control(
+        signal: AnimControlSignal,
+        rect_state: Gd<RectState>,
+        tween_info: Gd<TweenInfo>
+    ) -> Callable {
+        let signal: Signal = signal.to_untyped();
+        let this: Gd<Object> = signal.object().expect("Signal needs to be connected to an object to be fired");
+        Callable::from_fn("emit_anim_control_signal", move |_| {
+            signal.emit(&[this.to_variant(), rect_state.to_variant(), tween_info.to_variant()]);
+        })
+    }
+
+    fn signal_emit_anim_control(
+        signal: AnimControlSignal,
+        rect_state: Gd<RectState>,
+        tween_info: Gd<TweenInfo>
+    ) {
+        let signal: Signal = signal.to_untyped();
+        let this: Gd<Object> = signal.object().expect("Signal needs to be connected to an object to be fired");
+        signal.emit(&[this.to_variant(), rect_state.to_variant(), tween_info.to_variant()]);
+    }
+
+    fn get_signal_emit_callable_anim(
+        signal: AnimSignal,
+        content_control_state: Gd<RectState>,
+        shadow_state: Gd<RectState>,
+        tween_info: Gd<TweenInfo>
+    ) -> Callable {
+        let signal: Signal = signal.to_untyped();
+        let this: Gd<Object> = signal.object().expect("Signal needs to be connected to an object to be fired");
+        Callable::from_fn("emit_anim_signal", move |_| {
+            signal.emit(&[this.to_variant(), content_control_state.to_variant(), shadow_state.to_variant(), tween_info.to_variant()]);
+        })
+    }
+
+    fn signal_emit_anim(
+        signal: AnimSignal,
+        content_control_state: Gd<RectState>,
+        shadow_state: Gd<RectState>,
+        tween_info: Gd<TweenInfo>
+    ) {
+        let signal: Signal = signal.to_untyped();
+        let this: Gd<Object> = signal.object().expect("Signal needs to be connected to an object to be fired");
+        signal.emit(&[this.to_variant(), content_control_state.to_variant(), shadow_state.to_variant(), tween_info.to_variant()]);
+    }
 
     // endregion
 
@@ -522,45 +607,20 @@ impl FilmWindow {
                 .set_ease(tween_info_bind.ease_type);
 
             self.tween.as_deref_mut().expect("Tween needs to be initialized in do_tween_change").tween_method(
-                method_func,
+                &method_func.bind(&[self.this.to_variant()]),
                 &rect_state_bind.start.to_variant(),
                 &rect_state_bind.end.to_variant(),
                 tween_info_bind.duration
             ).set_delay(tween_info_bind.delay);
         }
 
-        let this: Gd<FilmWindow> = self.to_gd();
-
-        // Type is enforced outside of this method, so we can confidently use untyped Signals
-        let signal_changed: Signal = signal_changed.to_untyped();
-        let signal_start: Signal = signal_start.to_untyped();
-        let signal_end: Signal = signal_end.to_untyped();
-
-        let varargs: [Variant; 3] = [
-            this.to_variant(),
-            rect_state.to_variant(),
-            tween_info.to_variant(),
-        ];
-
-        // TODO: Investigate if there is a better way? I feel like I shouldn't need to clone this much
-        // TODO: Gd of ref counter?
-        let varargs_ref: [Variant; 3] = varargs.clone();
-        let changed_callback: Callable = Callable::from_fn("changed_callback", move |_| {
-            signal_changed.emit(&varargs_ref);
-        });
-        self.tween.as_deref_mut().expect("Tween needs to be initialized in do_tween_change").tween_callback(&changed_callback).set_delay(tween_info.bind().delay);
-
-        let varargs_ref: [Variant; 3] = varargs.clone();
-        let start_callback: Callable = Callable::from_fn("start_callback", move |_| {
-            signal_start.emit(&varargs_ref.clone());
-        });
+        let start_callback: Callable = Self::get_signal_emit_callable_anim_component(signal_start, rect_state.clone(), tween_info.clone());
         self.tween.as_deref_mut().expect("Tween needs to be initialized in do_tween_change").tween_callback(&start_callback).set_delay(tween_info.bind().delay);
 
-        let varargs_ref: [Variant; 3] = varargs.clone();
-        let end_callback: Callable = Callable::from_fn("end_callback", move |_| {
-            signal_end.emit(&varargs_ref.clone());
-        });
+        let end_callback: Callable = Self::get_signal_emit_callable_anim_component(signal_end, rect_state.clone(), tween_info.clone());
         self.tween.as_deref_mut().expect("Tween needs to be initialized in do_tween_change").tween_callback(&end_callback).set_delay(tween_info.bind().delay);
+
+        Self::signal_emit_anim_component(signal_changed, rect_state, tween_info);
     }
 
     // Tweens controls, similar to _do_tween_rect but with offset handling and signals that give references to controls
@@ -598,41 +658,13 @@ impl FilmWindow {
             ).set_delay(tween_info_bind.delay);
         }
 
-        let this: Gd<FilmWindow> = self.to_gd();
+        let start_callback: Callable = Self::get_signal_emit_callable_anim_control(signal_start, rect_state.clone(), tween_info.clone());
+        self.tween.as_deref_mut().expect("Tween needs to be initialized in do_tween_change").tween_callback(&start_callback).set_delay(tween_info.bind().delay);
 
-        // Type is enforced outside of this method, so we can confidently use untyped Signals
-        // TODO: These don't need to be untyped
-        let signal_changed: Signal = signal_changed.to_untyped();
-        let signal_start: Signal = signal_start.to_untyped();
-        let signal_end: Signal = signal_end.to_untyped();
+        let end_callback: Callable = Self::get_signal_emit_callable_anim_control(signal_end, rect_state.clone(), tween_info.clone());
+        self.tween.as_deref_mut().expect("Tween needs to be initialized in do_tween_change").tween_callback(&end_callback).set_delay(tween_info.bind().delay);
 
-        let varargs: [Variant; 3] = [
-            this.to_variant(),
-            rect_state.to_variant(),
-            tween_info.to_variant(),
-        ];
-
-        // TODO: Investigate if there is a better way? I feel like I shouldn't need to clone this much
-        let varargs_ref: [Variant; 3] = varargs.clone();
-        let changed_callback: Callable = Callable::from_fn("changed_callback", move |_| {
-            signal_changed.emit(&varargs_ref);
-        });
-        self.tween.as_deref_mut().expect("Tween needs to be initialized in do_tween_change")
-            .tween_callback(&changed_callback).set_delay(tween_info.bind().delay);
-
-        let varargs_ref: [Variant; 3] = varargs.clone();
-        let start_callback: Callable = Callable::from_fn("start_callback", move |_| {
-            signal_start.emit(&varargs_ref.clone());
-        });
-        self.tween.as_deref_mut().expect("Tween needs to be initialized in do_tween_change")
-            .tween_callback(&start_callback).set_delay(tween_info.bind().delay);
-
-        let varargs_ref: [Variant; 3] = varargs.clone();
-        let end_callback: Callable = Callable::from_fn("end_callback", move |_| {
-            signal_end.emit(&varargs_ref.clone());
-        });
-        self.tween.as_deref_mut().expect("Tween needs to be initialized in do_tween_change")
-            .tween_callback(&end_callback).set_delay(tween_info.bind().delay);
+        Self::signal_emit_anim_control(signal_changed, rect_state, tween_info);
     }
 
     // Tween the container's location to a given rect with the appropriate offsets
@@ -646,14 +678,14 @@ impl FilmWindow {
             Self::tween_method_content_container(val[0].to(), val[1].to());
         });
 
-        let this: Gd<FilmWindow> = self.to_gd();
+        let this: Gd<FilmWindow> = self.this.clone(); // Avoids borrowing issues since it self needs mutable borrows
 
         let tween_content_container_changed: AnimComponentSignal = this.signals().tween_content_container_changed().__typed;
         let tween_content_container_changed_start: AnimComponentSignal = this.signals().tween_content_container_changed_start().__typed;
         let tween_content_container_changed_end: AnimComponentSignal = this.signals().tween_content_container_changed_end().__typed;
 
         self.do_tween_rect(
-            &callable.bind(&[this.to_variant()]),
+            &callable,
             rect_state,
             tween_info,
             tween_content_container_changed,
@@ -672,14 +704,14 @@ impl FilmWindow {
             Self::tween_method_shadow(val[0].to(), val[1].to());
         });
 
-        let this: Gd<FilmWindow> = self.to_gd();
+        let this: Gd<FilmWindow> = self.this.clone(); // Avoids borrowing issues since it self needs mutable borrows
 
         let tween_shadow_changed: AnimComponentSignal = this.signals().tween_shadow_changed().__typed;
         let tween_shadow_changed_start: AnimComponentSignal = this.signals().tween_shadow_changed_start().__typed;
         let tween_shadow_changed_end: AnimComponentSignal = this.signals().tween_shadow_changed_end().__typed;
 
         self.do_tween_rect(
-            &callable.bind(&[this.to_variant()]),
+            &callable,
             rect_state,
             tween_info,
             tween_shadow_changed,
@@ -700,41 +732,13 @@ impl FilmWindow {
         self.do_tween_content_container(content_container_state.clone(), tween_info.clone());
         self.do_tween_shadow(shadow_state.clone(), tween_info.clone());
 
-        let this: Gd<FilmWindow> = self.to_gd();
+        let start_callback: Callable = Self::get_signal_emit_callable_anim(signal_start, content_container_state.clone(), shadow_state.clone(), tween_info.clone());
+        self.tween.as_deref_mut().expect("Tween needs to be initialized in do_tween_change").tween_callback(&start_callback).set_delay(tween_info.bind().delay);
 
-        // Type is enforced outside of this method, so we can confidently use untyped Signals
-        let signal_changed: Signal = signal_changed.to_untyped();
-        let signal_start: Signal = signal_start.to_untyped();
-        let signal_end: Signal = signal_end.to_untyped();
+        let end_callback: Callable = Self::get_signal_emit_callable_anim(signal_end, content_container_state.clone(), shadow_state.clone(), tween_info.clone());
+        self.tween.as_deref_mut().expect("Tween needs to be initialized in do_tween_change").tween_callback(&end_callback).set_delay(tween_info.bind().delay);
 
-        let varargs: [Variant; 4] = [
-            this.to_variant(),
-            content_container_state.to_variant(),
-            shadow_state.to_variant(),
-            tween_info.to_variant(),
-        ];
-
-        // TODO: Investigate if there is a better way? I feel like I shouldn't need to clone this much
-        let varargs_ref: [Variant; 4] = varargs.clone();
-        let changed_callback: Callable = Callable::from_fn("changed_callback", move |_| {
-            signal_changed.emit(&varargs_ref);
-        });
-        self.tween.as_deref_mut().expect("Tween needs to be initialized in do_tween_change")
-            .tween_callback(&changed_callback).set_delay(tween_info.bind().delay);
-
-        let varargs_ref: [Variant; 4] = varargs.clone();
-        let start_callback: Callable = Callable::from_fn("start_callback", move |_| {
-            signal_start.emit(&varargs_ref.clone());
-        });
-        self.tween.as_deref_mut().expect("Tween needs to be initialized in do_tween_change")
-            .tween_callback(&start_callback).set_delay(tween_info.bind().delay);
-
-        let varargs_ref: [Variant; 4] = varargs.clone();
-        let end_callback: Callable = Callable::from_fn("end_callback", move |_| {
-            signal_end.emit(&varargs_ref.clone());
-        });
-        self.tween.as_deref_mut().expect("Tween needs to be initialized in do_tween_change")
-            .tween_callback(&end_callback).set_delay(tween_info.bind().delay);
+        Self::signal_emit_anim(signal_changed, content_container_state, shadow_state, tween_info);
     }
 
     // Calls chain on tween at the end
@@ -763,8 +767,7 @@ impl FilmWindow {
             },
         }
 
-        // TODO: Instead of constantly reallocating, pass down the object through the animation methods
-        let this: Gd<FilmWindow> = self.to_gd();
+        let this: Gd<FilmWindow> = self.this.clone(); // Avoids borrowing issues since it self needs mutable borrows
 
         let tween_offset_changed: AnimSignal = this.signals().tween_offset_changed().__typed;
         let tween_offset_changed_start: AnimSignal = this.signals().tween_offset_changed_start().__typed;
@@ -787,7 +790,7 @@ impl FilmWindow {
         tween_info: Gd<TweenInfo>,
         clip_mode: TweenClipMode,
     ) {
-        let this: Gd<FilmWindow> = self.to_gd();
+        let this: Gd<FilmWindow> = self.this.clone(); // Avoids borrowing issues since it self needs mutable borrows
 
         let tween_clipping_control_changed: AnimControlSignal = this.signals().tween_clipping_control_changed().__typed;
         let tween_clipping_control_changed_start: AnimControlSignal = this.signals().tween_clipping_control_changed_start().__typed;
@@ -809,7 +812,7 @@ impl FilmWindow {
         });
 
         self.tween.as_deref_mut().expect("Tween needs to be initialized in do_tween_change")
-            .tween_callback(&callback.bind(&[this.to_variant()]));
+            .tween_callback(&callback.bind(&[self.this.to_variant()]));
 
         let mut child_size: Vector2 = self.child_size_offset - self.child_pos_offset;
 
@@ -855,7 +858,7 @@ impl FilmWindow {
         tween_info: Gd<TweenInfo>,
         clip_mode: TweenClipMode,
     ) {
-        let this: Gd<FilmWindow> = self.to_gd();
+        let this: Gd<FilmWindow> = self.this.clone(); // Avoids borrowing issues since it self needs mutable borrows
 
         let tween_window_changed: AnimSignal = this.signals().tween_window_changed().__typed;
         let tween_window_changed_start: AnimSignal = this.signals().tween_window_changed_start().__typed;
@@ -900,13 +903,13 @@ impl FilmWindow {
     // TODO: Move chain commands here instead of other tween funcs
     fn do_tween_change(
         &mut self,
-        new_rect: Rect2,
+        new_rect: Rect2, // Because these represent a state, they do not need to be referenced
         tween_window_info: Gd<TweenInfo>,
         tween_offset_info: Gd<TweenInfo>,
-        tween_offset_mode: TweenOffsetMode,
-        callback: Callable,
-        clip_mode: TweenClipMode,
-        mut tween_signal: AnimWindowSignal,
+        tween_offset_mode: TweenOffsetMode, // Consumed in this function, hence no Gd
+        callback: Callable, // Callback for entire animation, hence is consumed here
+        clip_mode: TweenClipMode, // Passed down without need for multiple references
+        mut tween_signal: AnimWindowSignal, // Consumed here
     ) {
         // TODO: Switch all arguments to Gd so you can easily pass between functions
 
@@ -926,11 +929,9 @@ impl FilmWindow {
             Self::move_control_preserve_rect_global(val[0].to(), val[1].to(), val[2].to());
         });
 
-        let this: Gd<FilmWindow> = self.to_gd();
-
         // Update positions when tweening begins, so the update is drawn at the same time as the rects
         self.tween.as_deref_mut().expect("Tween needs to be initialized in do_tween_change")
-            .tween_callback(&callable.bind(&[new_rect.to_variant(), window_control_rect_pos_diff.to_variant(), this.to_variant()]));
+            .tween_callback(&callable.bind(&[new_rect.to_variant(), window_control_rect_pos_diff.to_variant(), self.this.to_variant()]));
 
         // Update rects so tweening calculations are from the correct place
         self.content_container_rect.position -= window_control_rect_pos_diff;
@@ -966,11 +967,14 @@ impl FilmWindow {
                 .chain();
         }
 
+        // Allows ownership to cleanly be consumed by do_tween_window_size
+        let stop_clip: bool = clip_mode == TweenClipMode::ClipCurrentSize || clip_mode == TweenClipMode::ClipFinalSize;
+
         self.do_tween_window_size(
             Gd::from_object(window_content_container_state.clone()),
             Gd::from_object(window_shadow_state.clone()),
             tween_window_info.clone(),
-            clip_mode.clone(),
+            clip_mode,
         );
 
         // End of window size tween
@@ -978,13 +982,13 @@ impl FilmWindow {
             .chain();
 
         // Tween clipping must be de-initialized manually
-        if clip_mode == TweenClipMode::ClipCurrentSize || clip_mode == TweenClipMode::ClipFinalSize {
+        if stop_clip {
             let callable: Callable = Callable::from_fn("stop_clipping", |val| {
                 Self::stop_clipping(val[0].to());
             });
 
             self.tween.as_deref_mut().expect("Tween needs to be initialized in do_tween_change")
-                .tween_callback(&callable.bind(&[this.to_variant()]));
+                .tween_callback(&callable.bind(&[self.this.to_variant()]));
         }
 
         let mut offset_content_container_state: RectState = RectState {
@@ -1088,7 +1092,7 @@ impl FilmWindow {
         let window_enter_info: Gd<TweenInfo> = self.tween_window_enter_info.clone();
         let offset_enter_info: Gd<TweenInfo> = self.tween_offset_enter_info.clone();
 
-        let this: Gd<FilmWindow> = self.to_gd();
+        let this: Gd<FilmWindow> = self.this.clone(); // Avoids borrowing issues since it self needs mutable borrows
         let signal: AnimWindowSignal = this.signals().tween_entered().__typed;
 
         self.do_tween_change(
@@ -1119,7 +1123,7 @@ impl FilmWindow {
         let window_exit_info: Gd<TweenInfo> = self.tween_window_exit_info.clone();
         let offset_exit_info: Gd<TweenInfo> = self.tween_offset_exit_info.clone();
 
-        let this: Gd<FilmWindow> = self.to_gd();
+        let this: Gd<FilmWindow> = self.this.clone(); // Avoids borrowing issues since it self needs mutable borrows
         let signal: AnimWindowSignal = this.signals().tween_exited().__typed;
 
         self.do_tween_change(
@@ -1155,9 +1159,10 @@ impl FilmWindow {
         let window_change_info: Gd<TweenInfo> = self.tween_window_change_info.clone();
         let offset_change_info: Gd<TweenInfo> = self.tween_offset_change_info.clone();
 
-        let this: Gd<FilmWindow> = self.to_gd();
+        let this: Gd<FilmWindow> = self.this.clone(); // Avoids borrowing issues since it self needs mutable borrows
         let signal: AnimWindowSignal = this.signals().tween_changed().__typed;
-        
+
+
         self.do_tween_change(
             new_rect,
             window_change_info,
