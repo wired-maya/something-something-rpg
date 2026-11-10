@@ -6,7 +6,6 @@ use godot::prelude::*;
 use godot::classes::{Control, Engine, IPanel, Panel, StyleBox, ThemeDb, Tween};
 use crate::anim_data_types::*;
 
-// TODO: Use RustCallable
 #[derive(GodotClass)]
 #[class(base = Panel, tool)]
 pub struct FilmWindow {
@@ -189,7 +188,7 @@ impl IPanel for FilmWindow {
             tween_window_exit_info: Default::default(),
             tween_offset_exit_info: Default::default(),
 
-            clipping_control: Control::new_alloc(), // TODO: Always present, so remove checks
+            clipping_control: Control::new_alloc(),
 
             child_pos_offset: Vector2::ZERO,
             child_size_offset: Vector2::ZERO,
@@ -593,9 +592,8 @@ impl FilmWindow {
 
     // region: Tween Functions
 
-    // TODO: Update comment
     // Base function for tweening rects managed by this window
-    // Signals can be null, but if present they must have the following arguments:
+    // Emits the following signals:
     // signal_changed(cur_rect: Rect2, final_rect: Rect2, trans: Tween.TransitionType, _ease: Tween.EaseType, duration: float)
     //  Signal is emitted when this function is called
     // signal_start(cur_rect: Rect2, final_rect: Rect2, trans: Tween.TransitionType, _ease: Tween.EaseType, duration: float)
@@ -815,10 +813,11 @@ impl FilmWindow {
 
         let mut child_size: Vector2 = self.child_size_offset - self.child_pos_offset;
 
-        // TODO: Reduce binds
+        let content_container_state_bind: GdRef<'_, RectState> = content_container_state.bind();
+
         match clip_mode {
-            TweenClipMode::ClipCurrentSize => { child_size += content_container_state.bind().start.size },
-            TweenClipMode::ClipFinalSize => { child_size += content_container_state.bind().end.size },
+            TweenClipMode::ClipCurrentSize => { child_size += content_container_state_bind.start.size },
+            TweenClipMode::ClipFinalSize => { child_size += content_container_state_bind.end.size },
             TweenClipMode::Stretch => (), // Used elsewhere
         }
 
@@ -833,11 +832,11 @@ impl FilmWindow {
                     RectState::from(
                         Rect2 {
                             // Keep it relative to FilmWindow
-                            position: -content_container_state.bind().start.position,
+                            position: -content_container_state_bind.start.position,
                             size: child_size
                         },
                         Rect2 {
-                            position: -content_container_state.bind().end.position,
+                            position: -content_container_state_bind.end.position,
                             size: child_size
                         },
                     ),
@@ -1015,28 +1014,32 @@ impl FilmWindow {
             .chain();
 
         // Calculate info for signal
-        // TODO: Check if it's more efficient to have f32 or f64 with Godot
         let total_delay: f64;
-        if tween_offset_mode == TweenOffsetMode::Both || tween_offset_mode == TweenOffsetMode::Before {
-            total_delay = tween_offset_info.bind().delay;
-        } else {
-            total_delay = tween_window_info.bind().delay;
-        }
+        let mut total_duration: f64;
+        let offset_duration: f64;
+        {
+            let tween_window_info_bind: GdRef<'_, TweenInfo> = tween_window_info.bind();
+            let tween_offset_info_bind: GdRef<'_, TweenInfo> = tween_offset_info.bind();
 
-        // TODO: REDUCE BINDS!!!
-        let mut total_duration: f64 = tween_window_info.bind().delay + tween_window_info.bind().duration;
-        let offset_duration: f64 = tween_offset_info.bind().delay + tween_offset_info.bind().duration;
+            total_delay = if tween_offset_mode == TweenOffsetMode::Both || tween_offset_mode == TweenOffsetMode::Before {
+                tween_offset_info_bind.delay
+            } else {
+                tween_window_info_bind.delay
+            };
 
-        if tween_offset_mode == TweenOffsetMode::Both {
-            total_duration += offset_duration * 2.0;
-        }
-        if tween_offset_mode == TweenOffsetMode::Before || tween_offset_mode == TweenOffsetMode::After {
-            total_duration += offset_duration;
+            total_duration = tween_window_info_bind.delay + tween_window_info_bind.duration;
+            offset_duration = tween_offset_info_bind.delay + tween_offset_info_bind.duration;
+
+            if tween_offset_mode == TweenOffsetMode::Both {
+                total_duration += offset_duration * 2.0;
+            } else if tween_offset_mode == TweenOffsetMode::Before || tween_offset_mode == TweenOffsetMode::After {
+                total_duration += offset_duration;
+            }
         }
 
         tween_signal.emit_tuple(
             (
-                self.to_gd(),
+                self.this.clone(),
 
                 Gd::from_object(window_content_container_state),
                 Gd::from_object(window_shadow_state),
@@ -1106,10 +1109,9 @@ impl FilmWindow {
             },
         };
 
-        // TODO: Direct declaration
-        let tween_offset_mode: TweenOffsetMode;
-        if self.do_tween_offset_exit { tween_offset_mode = TweenOffsetMode::Before }
-        else { tween_offset_mode = TweenOffsetMode::None }
+        let tween_offset_mode: TweenOffsetMode = if self.do_tween_offset_exit
+        { TweenOffsetMode::Before }
+        else { TweenOffsetMode::None };
 
         let window_exit_info: Gd<TweenInfo> = self.tween_window_exit_info.clone();
         let offset_exit_info: Gd<TweenInfo> = self.tween_offset_exit_info.clone();
