@@ -109,6 +109,10 @@ pub struct FilmWindow {
 
     // region: Callables
 
+    start_clipping_callable: Callable,
+    stop_clipping_callable: Callable,
+    move_control_preserve_rect_global_callable: Callable,
+
     // endregion
 }
 
@@ -166,7 +170,6 @@ impl IPanel for FilmWindow {
 
             enter_on_ready: true,
 
-            // TODO: Make here
             content_container_style_box: None,
             content_container_rect: Rect2::new(Vector2::ZERO, Vector2::new(100.0, 100.0)),
             content_container_offset: Vector2::ZERO,
@@ -190,6 +193,16 @@ impl IPanel for FilmWindow {
 
             child_pos_offset: Vector2::ZERO,
             child_size_offset: Vector2::ZERO,
+
+            start_clipping_callable: Callable::from_fn("tween_start_clipping", |val| {
+                Self::start_clipping(val[0].to());
+            }),
+            stop_clipping_callable: Callable::from_fn("stop_clipping", |val| {
+                Self::stop_clipping(val[0].to());
+            }),
+            move_control_preserve_rect_global_callable: Callable::from_fn("move_control_preserve_rect_global", |val| {
+                Self::move_control_preserve_rect_global(val[0].to(), val[1].to(), val[2].to());
+            }),
         }
     }
 
@@ -470,12 +483,10 @@ impl FilmWindow {
     // region: Drawing
 
     // TODO: Need to find a way to handle no style box being present
-    // TODO: Less base bindings
     fn load_theme(&mut self) {
         let size: Vector2 = self.base().get_size();
 
-        // WARNING: CURRENTLY UNWRAPS, EXPECT PANICS!
-        // TODO: Make a custom theme class for FilmWindows
+        // TODO: WARNING: CURRENTLY UNWRAPS, EXPECT PANICS!
         let content_container_style_box: Gd<StyleBox> = self.base().get_theme_stylebox("content_container").unwrap();
         let content_container_offset: Vector2 = Vector2::new(
             self.base().get_theme_constant("content_container_offset_x") as f32,
@@ -487,8 +498,7 @@ impl FilmWindow {
         self.content_container_rect.position = content_container_offset;
         self.content_container_rect.size = size;
 
-        // WARNING: CURRENTLY UNWRAPS, EXPECT PANICS!
-        // TODO: Make a custom theme class for FilmWindows
+        // TODO: WARNING: CURRENTLY UNWRAPS, EXPECT PANICS!
         let shadow_style_box: Gd<StyleBox> = self.base().get_theme_stylebox("shadow").unwrap();
         let shadow_offset: Vector2 = Vector2::new(
             self.base().get_theme_constant("shadow_offset_x") as f32,
@@ -548,18 +558,21 @@ impl FilmWindow {
         window.set_size(new_rect.size);
     }
 
-    fn tween_method_content_container(val: Rect2, mut window: Gd<FilmWindow>) {
+    #[func]
+    pub fn tween_method_content_container(val: Rect2, mut window: Gd<FilmWindow>) {
         window.bind_mut().content_container_rect = val;
         window.queue_redraw(); // Ran only once a frame, therefore it's fine to call multiple times during tween
     }
 
-    fn tween_method_shadow(val: Rect2, mut window: Gd<FilmWindow>) {
+    #[func]
+    pub fn tween_method_shadow(val: Rect2, mut window: Gd<FilmWindow>) {
         window.bind_mut().shadow_rect = val;
         window.queue_redraw(); // Ran only once a frame, therefore it's fine to call multiple times during tween
     }
 
     // Tweens content with offsets, useful for clipping and resizing with only the window size rects
-    fn tween_method_control(
+    #[func]
+    pub fn tween_method_control(
         mut val: Rect2,
         mut item: Gd<Control>,
         pos_offset: Vector2,
@@ -591,7 +604,7 @@ impl FilmWindow {
     //	Signal is emitted when the tween ends
     fn do_tween_rect(
         &mut self,
-        method_func: &Callable,
+        method_func: Callable,
         rect_state: Gd<RectState>,
         tween_info: Gd<TweenInfo>,
         signal_changed: AnimComponentSignal,
@@ -623,7 +636,7 @@ impl FilmWindow {
         Self::signal_emit_anim_component(signal_changed, rect_state, tween_info);
     }
 
-    // Tweens controls, similar to _do_tween_rect but with offset handling and signals that give references to controls
+    // Tweens controls, similar to do_tween_rect but with offset handling and signals that give references to controls
     fn do_tween_control(
         &mut self,
         control: Gd<Control>,
@@ -638,18 +651,14 @@ impl FilmWindow {
         {
             let rect_state_bind: GdRef<'_, RectState> = rect_state.bind();
             let tween_info_bind: GdRef<'_, TweenInfo> = tween_info.bind();
-
-            // TODO: Move out into struct
-            let callable = Callable::from_fn("tween_control_method", |val| {
-                Self::tween_method_control(val[0].to(), val[1].to(), val[2].to(), val[3].to());
-            });
+            let method: Callable = self.base().callable("tween_method_control");
 
             self.tween.as_deref_mut().expect("Tween needs to be initialized in do_tween_change")
                 .set_trans(tween_info_bind.trans_type)
                 .set_ease(tween_info_bind.ease_type);
 
             self.tween.as_deref_mut().expect("Tween needs to be initialized in do_tween_change").tween_method(
-                &callable.bind(&[
+                &method.bind(&[
                     control.to_variant(), pos_offset.to_variant(), size_offset.to_variant()
                 ]),
                 &rect_state_bind.start.to_variant(),
@@ -673,19 +682,16 @@ impl FilmWindow {
         rect_state: Gd<RectState>,
         tween_info: Gd<TweenInfo>
     ) {
-        // TODO: Move out into struct
-        let callable: Callable = Callable::from_fn("tween_method_content_container", |val| {
-            Self::tween_method_content_container(val[0].to(), val[1].to());
-        });
-
         let this: Gd<FilmWindow> = self.this.clone(); // Avoids borrowing issues since it self needs mutable borrows
 
         let tween_content_container_changed: AnimComponentSignal = this.signals().tween_content_container_changed().__typed;
         let tween_content_container_changed_start: AnimComponentSignal = this.signals().tween_content_container_changed_start().__typed;
         let tween_content_container_changed_end: AnimComponentSignal = this.signals().tween_content_container_changed_end().__typed;
 
+        let method: Callable = self.base().callable("tween_method_content_container");
+
         self.do_tween_rect(
-            &callable,
+            method,
             rect_state,
             tween_info,
             tween_content_container_changed,
@@ -699,19 +705,16 @@ impl FilmWindow {
         rect_state: Gd<RectState>,
         tween_info: Gd<TweenInfo>
     ) {
-        // TODO: Move out into struct
-        let callable: Callable = Callable::from_fn("tween_method_shadow", |val| {
-            Self::tween_method_shadow(val[0].to(), val[1].to());
-        });
-
         let this: Gd<FilmWindow> = self.this.clone(); // Avoids borrowing issues since it self needs mutable borrows
 
         let tween_shadow_changed: AnimComponentSignal = this.signals().tween_shadow_changed().__typed;
         let tween_shadow_changed_start: AnimComponentSignal = this.signals().tween_shadow_changed_start().__typed;
         let tween_shadow_changed_end: AnimComponentSignal = this.signals().tween_shadow_changed_end().__typed;
 
+        let method: Callable = self.base().callable("tween_method_shadow");
+
         self.do_tween_rect(
-            &callable,
+            method,
             rect_state,
             tween_info,
             tween_shadow_changed,
@@ -807,12 +810,8 @@ impl FilmWindow {
             tween_clipping_control_changed_end
         );
 
-        let callback: Callable = Callable::from_fn("tween_start_clipping", |val| {
-            Self::start_clipping(val[0].to());
-        });
-
         self.tween.as_deref_mut().expect("Tween needs to be initialized in do_tween_change")
-            .tween_callback(&callback.bind(&[self.this.to_variant()]));
+            .tween_callback(&self.start_clipping_callable.bind(&[self.this.to_variant()]));
 
         let mut child_size: Vector2 = self.child_size_offset - self.child_pos_offset;
 
@@ -899,7 +898,6 @@ impl FilmWindow {
 
     // Resize/move the window to the new rect
     // TODO: Add buffering or don't run if an animation is happening
-    // TODO: Return rect state of window
     // TODO: Move chain commands here instead of other tween funcs
     fn do_tween_change(
         &mut self,
@@ -925,13 +923,10 @@ impl FilmWindow {
         self.tween = Some(tween);
 
         let window_control_rect_pos_diff: Vector2 = new_rect.position - self.base().get_position();
-        let callable: Callable = Callable::from_fn("move_control_preserve_rect_global", |val| {
-            Self::move_control_preserve_rect_global(val[0].to(), val[1].to(), val[2].to());
-        });
 
         // Update positions when tweening begins, so the update is drawn at the same time as the rects
         self.tween.as_deref_mut().expect("Tween needs to be initialized in do_tween_change")
-            .tween_callback(&callable.bind(&[new_rect.to_variant(), window_control_rect_pos_diff.to_variant(), self.this.to_variant()]));
+            .tween_callback(&self.move_control_preserve_rect_global_callable.bind(&[new_rect.to_variant(), window_control_rect_pos_diff.to_variant(), self.this.to_variant()]));
 
         // Update rects so tweening calculations are from the correct place
         self.content_container_rect.position -= window_control_rect_pos_diff;
@@ -983,12 +978,8 @@ impl FilmWindow {
 
         // Tween clipping must be de-initialized manually
         if stop_clip {
-            let callable: Callable = Callable::from_fn("stop_clipping", |val| {
-                Self::stop_clipping(val[0].to());
-            });
-
             self.tween.as_deref_mut().expect("Tween needs to be initialized in do_tween_change")
-                .tween_callback(&callable.bind(&[self.this.to_variant()]));
+                .tween_callback(&self.stop_clipping_callable.bind(&[self.this.to_variant()]));
         }
 
         let mut offset_content_container_state: RectState = RectState {
@@ -1203,11 +1194,7 @@ impl FilmWindow {
     // Run close animation while keeping the window in the scene tree
     #[func]
     pub fn minimize(&mut self) {
-        // TODO: Consider Gd::callable()? If it works it should be implemented everywhere
-        let callback: Callable = Callable::from_fn("film_window_hide", |val| {
-            let mut window: Gd<FilmWindow> = val[0].to();
-            window.set_visible(false);
-        });
+        let callback: Callable = self.base().callable("set_visible").bind(&[false.to_variant()]);
 
         self.do_tween_exit(callback);
     }
@@ -1215,13 +1202,9 @@ impl FilmWindow {
     // Shrink window and close
     #[func]
     pub fn close(&mut self) {
-        // TODO: Consider Gd::callable()? If it works it should be implemented everywhere
-        let callback: Callable = Callable::from_fn("film_window_free", |val| {
-            let mut window: Gd<FilmWindow> = val[0].to();
-            window.queue_free();
-        });
+        let callback: Callable = self.base().callable("queue_free");
 
-        self.do_tween_exit(callback.bind(&[self.to_gd().to_variant()]));
+        self.do_tween_exit(callback);
     }
 
     // endregion
